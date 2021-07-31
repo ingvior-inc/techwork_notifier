@@ -5,11 +5,9 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
-from app.message_parts import (PROVIDER_SELF, PROVIDER_TKB,
-                               PROVIDER_FORTA_TECH, PROVIDER_BRS, PROVIDER,
-                               DATE_AND_TIME, DESCRIPTION, situations,
-                               providers)
-from app.settings import bot, CHAT_ID
+from app.text_parts import (PROVIDER, DATE_AND_TIME, DESCRIPTION,
+                            situations, providers)
+from app.settings import bot, chat_ids
 from app.states import OrderBuildingNotif
 from app.white_list import white_list
 
@@ -30,7 +28,8 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     # Cancel state and inform user about it
     await state.finish()
     # And remove keyboard (just in case)
-    await message.reply('Операция отменена',
+    await message.reply('Операция отменена. \n'
+                        'Пропишите /start, чтобы начать заново',
                         reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -82,7 +81,7 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     """
     Третий этап:
     1. Проверка выбранного провайдера на корректность и сохранение
-    2. Запрос даты и времени: можно поставить сейчас по кнопке или написать вручную
+    2. Запрос даты и времени: поставить Сейчас по кнопке или написать вручную
     """
     if message.text not in providers:
         await message.answer('Некорректный провайдер')
@@ -135,38 +134,17 @@ async def writing_about(message: types.Message, state: FSMContext):
 
     final_text = (f"<b>{user_data.get('chosen_situation')}</b> \n\n"
                   f"<b>{PROVIDER}</b>{user_data.get('chosen_provider')} \n"
-                  f"<b>{DATE_AND_TIME}</b>{user_data.get('written_date_and_time')} \n"
+                  f"<b>{DATE_AND_TIME}</b>"
+                  f"{user_data.get('written_date_and_time')} \n"
                   f"<b>{DESCRIPTION}</b>{user_data.get('custom_text')}")
 
     chats_recipients = []
 
-    if user_data.get('chosen_provider') == PROVIDER_SELF:
-        for i in CHAT_ID[PROVIDER_SELF]:
-            sended = await message.bot.send_message(chat_id=i, text=final_text)
-            chats_recipients.append(sended.chat.title)
-            logging.info(f'Message were sended to "{sended.chat.title}"'
-                         f'({sended.chat.id})')
-
-    elif user_data.get('chosen_provider') == PROVIDER_TKB:
-        for i in CHAT_ID[PROVIDER_TKB]:
-            sended = await message.bot.send_message(chat_id=i, text=final_text)
-            chats_recipients.append(sended.chat.title)
-            logging.info(f'Message were sended to "{sended.chat.title}"'
-                         f'({sended.chat.id})')
-
-    elif user_data.get('chosen_provider') == PROVIDER_FORTA_TECH:
-        for i in CHAT_ID[PROVIDER_FORTA_TECH]:
-            sended = await message.bot.send_message(chat_id=i, text=final_text)
-            chats_recipients.append(sended.chat.title)
-            logging.info(f'Message were sended to "{sended.chat.title}"'
-                         f'({sended.chat.id})')
-
-    elif user_data.get('chosen_provider') == PROVIDER_BRS:
-        for i in CHAT_ID[PROVIDER_BRS]:
-            sended = await message.bot.send_message(chat_id=i, text=final_text)
-            chats_recipients.append(sended.chat.title)
-            logging.info(f'Message were sended to "{sended.chat.title}"'
-                         f'({sended.chat.id})')
+    for i in chat_ids[user_data.get('chosen_provider')]:
+        sended = await message.bot.send_message(chat_id=i, text=final_text)
+        chats_recipients.append(sended.chat.title)
+        logging.info(f'Message has been sent to "{sended.chat.title}"'
+                     f'({sended.chat.id})')
 
     await message.answer(f'Текст отправлен в чаты: \n\n'
                          f'{chats_recipients} \n\n'
