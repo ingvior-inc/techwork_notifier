@@ -1,18 +1,17 @@
 import logging
 
 from aiogram import Dispatcher, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-from app.settings import bot, CHAT_ID
-from app.states import OrderBuildingNotif
-from app.white_list import white_list
 from app.message_parts import (PROVIDER_SELF, PROVIDER_TKB,
                                PROVIDER_FORTA_TECH, PROVIDER_BRS, PROVIDER,
                                DATE_AND_TIME, DESCRIPTION, situations,
                                providers)
-
+from app.settings import bot, CHAT_ID
+from app.states import OrderBuildingNotif
+from app.white_list import white_list
 
 dp = Dispatcher(bot, storage=MemoryStorage())
 
@@ -38,18 +37,28 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=['start', 'help'], state=None)
 @white_list
 async def start_building_notif(message: types.Message):
-
+    """
+    Первый этап сборки сообщения для рассылки. Выбор ситуации: сбой или работы
+    """
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for i in situations:
         keyboard.add(i)
     keyboard.add('Отмена')
 
-    await message.answer('О чём хотим сообщить?', reply_markup=keyboard)
     await OrderBuildingNotif.waiting_for_situation.set()
+    await message.answer('О чём хотим сообщить?', reply_markup=keyboard)
+
+    logging.info(f'{message.chat.username} '
+                 f'switched to {OrderBuildingNotif.waiting_for_situation}')
 
 
 @dp.message_handler(state=OrderBuildingNotif.waiting_for_situation)
 async def choice_of_situation(message: types.Message, state: FSMContext):
+    """
+    Второй этап:
+    1. Проверка выбранной ситуации на корректность и сохранение
+    2. Выбор провайдера
+    """
     if message.text not in situations:
         await message.answer('Выберите ситуацию с помощью клавиатуры')
         return
@@ -64,9 +73,17 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
     await OrderBuildingNotif.next()
     await message.answer('У кого намечается?', reply_markup=keyboard)
 
+    logging.info(f'{message.chat.username} '
+                 f'switched to {OrderBuildingNotif.waiting_for_provider}')
+
 
 @dp.message_handler(state=OrderBuildingNotif.waiting_for_provider)
 async def choice_of_provider(message: types.Message, state: FSMContext):
+    """
+    Третий этап:
+    1. Проверка выбранного провайдера на корректность и сохранение
+    2. Запрос даты и времени: можно поставить сейчас по кнопке или написать вручную
+    """
     if message.text not in providers:
         await message.answer('Некорректный провайдер')
         return
@@ -80,10 +97,17 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     await OrderBuildingNotif.next()
     await message.answer('Когда?', reply_markup=keyboard)
 
+    logging.info(f'{message.chat.username} '
+                 f'switched to {OrderBuildingNotif.waiting_for_date_and_time}')
+
 
 @dp.message_handler(state=OrderBuildingNotif.waiting_for_date_and_time)
 async def writing_date_and_time(message: types.Message, state: FSMContext):
-
+    """
+    Четвёртый этап:
+    1. Сохранение прописанных даты и времени
+    2. Запрос описания: пишется вручную
+    """
     await state.update_data(written_date_and_time=message.text)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -92,10 +116,19 @@ async def writing_date_and_time(message: types.Message, state: FSMContext):
     await OrderBuildingNotif.next()
     await message.answer('Опишите ситуацию', reply_markup=keyboard)
 
+    logging.info(f'{message.chat.username} '
+                 f'switched to {OrderBuildingNotif.waiting_for_custom_text}')
+
 
 @dp.message_handler(state=OrderBuildingNotif.waiting_for_custom_text)
 async def writing_about(message: types.Message, state: FSMContext):
-
+    """
+    Пятый этап:
+    1. Сохранение описания
+    2. Сборка текста на основе сохранённых ранее параметров
+    3. Рассылка сообщений по чатам в зависимости от выбранного  провайдера
+    4. Завершение работы State-машины
+    """
     await state.update_data(custom_text=message.text)
 
     user_data = await state.get_data()
@@ -105,22 +138,42 @@ async def writing_about(message: types.Message, state: FSMContext):
                   f"<b>{DATE_AND_TIME}</b>{user_data.get('written_date_and_time')} \n"
                   f"<b>{DESCRIPTION}</b>{user_data.get('custom_text')}")
 
+    chats_recipients = []
+
     if user_data.get('chosen_provider') == PROVIDER_SELF:
         for i in CHAT_ID[PROVIDER_SELF]:
-            await message.bot.send_message(chat_id=i, text=final_text)
+            sended = await message.bot.send_message(chat_id=i, text=final_text)
+            chats_recipients.append(sended.chat.title)
+            logging.info(f'Message were sended to "{sended.chat.title}"'
+                         f'({sended.chat.id})')
 
     elif user_data.get('chosen_provider') == PROVIDER_TKB:
         for i in CHAT_ID[PROVIDER_TKB]:
-            await message.bot.send_message(chat_id=i, text=final_text)
+            sended = await message.bot.send_message(chat_id=i, text=final_text)
+            chats_recipients.append(sended.chat.title)
+            logging.info(f'Message were sended to "{sended.chat.title}"'
+                         f'({sended.chat.id})')
 
     elif user_data.get('chosen_provider') == PROVIDER_FORTA_TECH:
         for i in CHAT_ID[PROVIDER_FORTA_TECH]:
-            await message.bot.send_message(chat_id=i, text=final_text)
+            sended = await message.bot.send_message(chat_id=i, text=final_text)
+            chats_recipients.append(sended.chat.title)
+            logging.info(f'Message were sended to "{sended.chat.title}"'
+                         f'({sended.chat.id})')
 
     elif user_data.get('chosen_provider') == PROVIDER_BRS:
         for i in CHAT_ID[PROVIDER_BRS]:
-            await message.bot.send_message(chat_id=i, text=final_text)
+            sended = await message.bot.send_message(chat_id=i, text=final_text)
+            chats_recipients.append(sended.chat.title)
+            logging.info(f'Message were sended to "{sended.chat.title}"'
+                         f'({sended.chat.id})')
 
-    await message.answer('Разослали', reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(f'Текст отправлен в чаты: \n\n'
+                         f'{chats_recipients} \n\n'
+                         f'Содержание:\n\n{final_text}',
+                         reply_markup=types.ReplyKeyboardRemove())
+
+    logging.info(f'{message.chat.username} '
+                 f'completed the last stage')
 
     await state.finish()
