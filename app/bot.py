@@ -24,7 +24,8 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     if current_state is None:
         return
 
-    logging.info('Cancelling state %r', current_state)
+    logging.info(f'{message.chat.username}({message.chat.id}) '
+                 f'cancelling state {current_state}')
     # Cancel state and inform user about it
     await state.finish()
     # And remove keyboard (just in case)
@@ -47,7 +48,7 @@ async def start_building_notif(message: types.Message):
     await OrderBuildingNotif.waiting_for_situation.set()
     await message.answer('О чём хотим сообщить?', reply_markup=keyboard)
 
-    logging.info(f'{message.chat.username} '
+    logging.info(f'{message.chat.username}({message.chat.id}) '
                  f'switched to {OrderBuildingNotif.waiting_for_situation}')
 
 
@@ -72,7 +73,7 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
     await OrderBuildingNotif.next()
     await message.answer('У кого намечается?', reply_markup=keyboard)
 
-    logging.info(f'{message.chat.username} '
+    logging.info(f'{message.chat.username}({message.chat.id}) '
                  f'switched to {OrderBuildingNotif.waiting_for_provider}')
 
 
@@ -96,7 +97,7 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     await OrderBuildingNotif.next()
     await message.answer('Когда?', reply_markup=keyboard)
 
-    logging.info(f'{message.chat.username} '
+    logging.info(f'{message.chat.username}({message.chat.id}) '
                  f'switched to {OrderBuildingNotif.waiting_for_date_and_time}')
 
 
@@ -115,7 +116,7 @@ async def writing_date_and_time(message: types.Message, state: FSMContext):
     await OrderBuildingNotif.next()
     await message.answer('Опишите ситуацию', reply_markup=keyboard)
 
-    logging.info(f'{message.chat.username} '
+    logging.info(f'{message.chat.username}({message.chat.id}) '
                  f'switched to {OrderBuildingNotif.waiting_for_custom_text}')
 
 
@@ -151,7 +152,7 @@ async def writing_about(message: types.Message, state: FSMContext):
                          f'Содержание:\n\n{final_text}',
                          reply_markup=types.ReplyKeyboardRemove())
 
-    logging.info(f'{message.chat.username} '
+    logging.info(f'{message.chat.username}({message.chat.id}) '
                  f'completed the last stage')
 
     await state.finish()
