@@ -4,6 +4,7 @@ from aiogram import Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
+from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
 
 from app.text_parts import (PROVIDER, DATE_AND_TIME, DESCRIPTION,
                             situations, providers)
@@ -71,7 +72,7 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
     keyboard.add('Отмена')
 
     await OrderBuildingNotif.next()
-    await message.answer('У кого намечается?', reply_markup=keyboard)
+    await message.answer('У кого?', reply_markup=keyboard)
 
     logging.info(f'{message.chat.username}({message.chat.id}) '
                  f'switched to {OrderBuildingNotif.waiting_for_provider}')
@@ -85,7 +86,8 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     2. Запрос даты и времени: поставить Сейчас по кнопке или написать вручную
     """
     if message.text not in providers:
-        await message.answer('Некорректный провайдер')
+        await message.answer('Некорректный провайдер. \n'
+                             'Выберите с помощью клавиатуры')
         return
 
     await state.update_data(chosen_provider=message.text)
@@ -142,10 +144,14 @@ async def writing_about(message: types.Message, state: FSMContext):
     chats_recipients = []
 
     for i in chat_ids[user_data.get('chosen_provider')]:
-        sended = await message.bot.send_message(chat_id=i, text=final_text)
-        chats_recipients.append(sended.chat.title)
-        logging.info(f'Message has been sent to "{sended.chat.title}"'
-                     f'({sended.chat.id})')
+        try:
+            sended = await message.bot.send_message(chat_id=i, text=final_text)
+            chats_recipients.append(sended.chat.title)
+            logging.info(f'Message has been sent to "{sended.chat.title}"'
+                         f'({sended.chat.id})')
+        except (ChatNotFound, ChatIdIsEmpty):
+            await message.answer(f'Группа с id {i} не найдена')
+            logging.error(f'ID {i} - group not found exception')
 
     await message.answer(f'Текст отправлен в чаты: \n\n'
                          f'{chats_recipients} \n\n'

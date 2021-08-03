@@ -12,7 +12,7 @@ TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN, parse_mode='HTML')
 
 # Пользователи, которые могут использовать бота
-accepted_user_ids = (512309881,)
+accepted_user_ids = (512309881, 170476466)
 
 # По каким чатам рассылать сообщение по выбранному провайдеру
 chat_ids = {
