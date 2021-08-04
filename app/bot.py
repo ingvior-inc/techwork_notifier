@@ -103,7 +103,7 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     if (user_data.get('chosen_situation') == HAPPENED_FAILUTE_RESOLVE
         or user_data.get('chosen_situation') == HAPPENED_TECHNICAL_WORK_RESOLVE):
 
-        final_text = (f"{user_data.get('chosen_situation')}\n"
+        final_text = (f"{user_data.get('chosen_situation')}\n\n"
                       f"{PROVIDER}{user_data.get('chosen_provider')}")
 
         chats_recipients = []
