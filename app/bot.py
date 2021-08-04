@@ -8,8 +8,7 @@ from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
 
 from app.text_parts import (HAPPENED_FAILUTE_RESOLVE,
                             HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
-                            DATE_AND_TIME, DESCRIPTION,
-                            situations, providers)
+                            DATE_AND_TIME, situations, providers)
 from app.settings import bot, chat_ids
 from app.states import OrderBuildingNotif
 from app.white_list import white_list
@@ -100,11 +99,15 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     # Проверка на ситуацию: если сбой или работы завершены, то разослать текст
     # и закончить state-машину
     user_data = await state.get_data()
+
     if (user_data.get('chosen_situation') == HAPPENED_FAILUTE_RESOLVE
-            or HAPPENED_TECHNICAL_WORK_RESOLVE):
+        or user_data.get('chosen_situation') == HAPPENED_TECHNICAL_WORK_RESOLVE):
+
         final_text = (f"{user_data.get('chosen_situation')}"
                       f"{PROVIDER}{user_data.get('chosen_provider')}")
+
         chats_recipients = []
+
         for i in chat_ids[user_data.get('chosen_provider')]:
             try:
                 sended = await message.bot.send_message(chat_id=i,
@@ -115,12 +118,15 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
             except (ChatNotFound, ChatIdIsEmpty):
                 await message.answer(f'Группа с id {i} не найдена')
                 logging.error(f'ID {i} - group not found exception')
+
         await message.answer(f'Текст отправлен в чаты: \n\n'
                              f'{chats_recipients} \n\n'
                              f'Содержание:\n\n{final_text}',
                              reply_markup=types.ReplyKeyboardRemove())
+
         logging.info(f'{message.chat.username}({message.chat.id}) '
                      f'completed the last stage')
+
         await state.finish()
         return
     #
@@ -171,8 +177,8 @@ async def writing_description(message: types.Message, state: FSMContext):
     final_text = (f"{user_data.get('chosen_situation')} \n\n"
                   f"{PROVIDER}{user_data.get('chosen_provider')} \n"
                   f"{DATE_AND_TIME}"
-                  f"{user_data.get('written_date_and_time')} \n"
-                  f"{DESCRIPTION}{user_data.get('written_description')}")
+                  f"{user_data.get('written_date_and_time')} \n\n"
+                  f"{user_data.get('written_description')}")
 
     chats_recipients = []
 
