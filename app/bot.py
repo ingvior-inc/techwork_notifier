@@ -119,19 +119,19 @@ async def writing_date_and_time(message: types.Message, state: FSMContext):
     await message.answer('Опишите ситуацию', reply_markup=keyboard)
 
     logging.info(f'{message.chat.username}({message.chat.id}) '
-                 f'switched to {OrderBuildingNotif.waiting_for_custom_text}')
+                 f'switched to {OrderBuildingNotif.waiting_for_description}')
 
 
-@dp.message_handler(state=OrderBuildingNotif.waiting_for_custom_text)
-async def writing_about(message: types.Message, state: FSMContext):
+@dp.message_handler(state=OrderBuildingNotif.waiting_for_description)
+async def writing_description(message: types.Message, state: FSMContext):
     """
     Пятый этап:
     1. Сохранение описания
     2. Сборка текста на основе выбранных ранее параметров
     3. Рассылка сообщений по чатам в зависимости от выбранного  провайдера
-    4. Завершение работы Finit-state-машины
+    4. Завершение работы
     """
-    await state.update_data(custom_text=message.text)
+    await state.update_data(written_description=message.text)
 
     user_data = await state.get_data()
 
@@ -139,7 +139,7 @@ async def writing_about(message: types.Message, state: FSMContext):
                   f"<b>{PROVIDER}</b>{user_data.get('chosen_provider')} \n"
                   f"<b>{DATE_AND_TIME}</b>"
                   f"{user_data.get('written_date_and_time')} \n"
-                  f"<b>{DESCRIPTION}</b>{user_data.get('custom_text')}")
+                  f"<b>{DESCRIPTION}</b>{user_data.get('written_description')}")
 
     chats_recipients = []
 
