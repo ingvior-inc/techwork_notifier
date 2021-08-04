@@ -19,10 +19,6 @@ DATE_AND_TIME = '<b>Когда: </b>'
 
 #######################################################
 
-DESCRIPTION = '<b>Описание: </b>'
-
-#######################################################
-
 situations = [HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
               HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE]
 providers = [PROVIDER_SELF, PROVIDER_TKB, PROVIDER_FORTA_TECH, PROVIDER_BRS]

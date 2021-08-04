@@ -6,11 +6,11 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
 
+from app.settings import bot, chat_ids
+from app.states import OrderBuildingNotif
 from app.text_parts import (HAPPENED_FAILUTE_RESOLVE,
                             HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
                             DATE_AND_TIME, situations, providers)
-from app.settings import bot, chat_ids
-from app.states import OrderBuildingNotif
 from app.white_list import white_list
 
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -103,7 +103,7 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     if (user_data.get('chosen_situation') == HAPPENED_FAILUTE_RESOLVE
         or user_data.get('chosen_situation') == HAPPENED_TECHNICAL_WORK_RESOLVE):
 
-        final_text = (f"{user_data.get('chosen_situation')}"
+        final_text = (f"{user_data.get('chosen_situation')}\n"
                       f"{PROVIDER}{user_data.get('chosen_provider')}")
 
         chats_recipients = []
