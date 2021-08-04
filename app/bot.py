@@ -6,7 +6,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
 
-from app.text_parts import (PROVIDER, DATE_AND_TIME, DESCRIPTION,
+from app.text_parts import (HAPPENED_FAILUTE_RESOLVE,
+                            HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
+                            DATE_AND_TIME, DESCRIPTION,
                             situations, providers)
 from app.settings import bot, chat_ids
 from app.states import OrderBuildingNotif
@@ -83,7 +85,10 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     """
     Третий этап:
     1. Проверка выбранного провайдера на корректность и сохранение
-    2. Запрос даты и времени: поставить Сейчас по кнопке или написать вручную
+    2. Проверка выбранной ситуации: если это конец работ или сбоя, то
+    отправляется соответствующая рассылка по выбранному провайдеру,
+    цикл завершается досрочно.
+    3. Запрос даты и времени: поставить Сейчас по кнопке или написать вручную
     """
     if message.text not in providers:
         await message.answer('Некорректный провайдер. \n'
@@ -91,6 +96,34 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
         return
 
     await state.update_data(chosen_provider=message.text)
+
+    # Проверка на ситуацию: если сбой или работы завершены, то разослать текст
+    # и закончить state-машину
+    user_data = await state.get_data()
+    final_text = f"{user_data.get('chosen_situation')}"
+    if user_data.get('chosen_situation') == (HAPPENED_FAILUTE_RESOLVE
+                                             or
+                                             HAPPENED_TECHNICAL_WORK_RESOLVE):
+        chats_recipients = []
+        for i in chat_ids[user_data.get('chosen_provider')]:
+            try:
+                sended = await message.bot.send_message(chat_id=i,
+                                                        text=final_text)
+                chats_recipients.append(sended.chat.title)
+                logging.info(f'Message has been sent to "{sended.chat.title}"'
+                             f'({sended.chat.id})')
+            except (ChatNotFound, ChatIdIsEmpty):
+                await message.answer(f'Группа с id {i} не найдена')
+                logging.error(f'ID {i} - group not found exception')
+        await message.answer(f'Текст отправлен в чаты: \n\n'
+                             f'{chats_recipients} \n\n'
+                             f'Содержание:\n\n{final_text}',
+                             reply_markup=types.ReplyKeyboardRemove())
+        logging.info(f'{message.chat.username}({message.chat.id}) '
+                     f'completed the last stage')
+        await state.finish()
+        return
+    #
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add('Сейчас')
@@ -135,7 +168,7 @@ async def writing_description(message: types.Message, state: FSMContext):
 
     user_data = await state.get_data()
 
-    final_text = (f"<b>{user_data.get('chosen_situation')}</b> \n\n"
+    final_text = (f"{user_data.get('chosen_situation')} \n\n"
                   f"<b>{PROVIDER}</b>{user_data.get('chosen_provider')} \n"
                   f"<b>{DATE_AND_TIME}</b>"
                   f"{user_data.get('written_date_and_time')} \n"
