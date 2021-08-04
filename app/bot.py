@@ -101,9 +101,7 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     # и закончить state-машину
     user_data = await state.get_data()
     final_text = f"{user_data.get('chosen_situation')}"
-    if user_data.get('chosen_situation') == (HAPPENED_FAILUTE_RESOLVE
-                                             or
-                                             HAPPENED_TECHNICAL_WORK_RESOLVE):
+    if user_data.get('chosen_situation') == HAPPENED_FAILUTE_RESOLVE or HAPPENED_TECHNICAL_WORK_RESOLVE:
         chats_recipients = []
         for i in chat_ids[user_data.get('chosen_provider')]:
             try:
@@ -169,10 +167,10 @@ async def writing_description(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
 
     final_text = (f"{user_data.get('chosen_situation')} \n\n"
-                  f"<b>{PROVIDER}</b>{user_data.get('chosen_provider')} \n"
-                  f"<b>{DATE_AND_TIME}</b>"
+                  f"{PROVIDER}{user_data.get('chosen_provider')} \n"
+                  f"{DATE_AND_TIME}"
                   f"{user_data.get('written_date_and_time')} \n"
-                  f"<b>{DESCRIPTION}</b>{user_data.get('written_description')}")
+                  f"{DESCRIPTION}{user_data.get('written_description')}")
 
     chats_recipients = []
 
