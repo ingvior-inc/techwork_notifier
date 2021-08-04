@@ -100,8 +100,10 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     # Проверка на ситуацию: если сбой или работы завершены, то разослать текст
     # и закончить state-машину
     user_data = await state.get_data()
-    final_text = f"{user_data.get('chosen_situation')}"
-    if user_data.get('chosen_situation') == HAPPENED_FAILUTE_RESOLVE or HAPPENED_TECHNICAL_WORK_RESOLVE:
+    if (user_data.get('chosen_situation') == HAPPENED_FAILUTE_RESOLVE
+            or HAPPENED_TECHNICAL_WORK_RESOLVE):
+        final_text = (f"{user_data.get('chosen_situation')}"
+                      f"{PROVIDER}{user_data.get('chosen_provider')}")
         chats_recipients = []
         for i in chat_ids[user_data.get('chosen_provider')]:
             try:
