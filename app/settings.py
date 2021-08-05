@@ -12,12 +12,13 @@ TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN, parse_mode='HTML')
 
 # Пользователи, которые могут использовать бота
-accepted_user_ids = (512309881, 170476466)
+accepted_user_id = (512309881, 170476466)
 
 # По каким чатам рассылать сообщение по выбранному провайдеру
-chat_ids = {
-    PROVIDER_SELF: [-520470585, -599355925, -550816100],
-    PROVIDER_TKB: [-520470585],
-    PROVIDER_FORTA_TECH: [-599355925],
-    PROVIDER_BRS: [-550816100]
+chat_id = {
+    PROVIDER_SELF: (-529458513, -477364969, -579903648, -535541196,
+                    -592277061),
+    PROVIDER_TKB: (-529458513, -592277061),
+    PROVIDER_FORTA_TECH: (-477364969, -579903648, -535541196),
+    PROVIDER_BRS: (-529458513, )
 }

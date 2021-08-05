@@ -1,6 +1,6 @@
 import logging
 
-from app.settings import accepted_user_ids
+from app.settings import accepted_user_id
 
 
 def white_list(func):
@@ -9,7 +9,7 @@ def white_list(func):
     Декоратор таковых проверяет.
     """
     async def wrapper(message):
-        if message.chat.id in accepted_user_ids:
+        if message.chat.id in accepted_user_id:
             logging.info(f'{message.chat.username}({message.chat.id})'
                          f' - accepted')
             return await func(message)
