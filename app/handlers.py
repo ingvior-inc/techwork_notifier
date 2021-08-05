@@ -4,14 +4,13 @@ from aiogram import Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
 
-from app.settings import bot, chat_id
+from app.functions import white_list, notification_sender
+from app.settings import bot
 from app.states import OrderBuildingNotif
 from app.text_parts import (HAPPENED_FAILUTE_RESOLVE,
                             HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
                             DATE_AND_TIME, situations, providers)
-from app.white_list import white_list
 
 dp = Dispatcher(bot, storage=MemoryStorage())
 
@@ -106,28 +105,7 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
         final_text = (f"{user_data.get('chosen_situation')}\n\n"
                       f"{PROVIDER}{user_data.get('chosen_provider')}")
 
-        chats_recipients = []
-
-        for i in chat_id[user_data.get('chosen_provider')]:
-            try:
-                sended = await message.bot.send_message(chat_id=i,
-                                                        text=final_text)
-                chats_recipients.append(sended.chat.title)
-                logging.info(f'Message has been sent to "{sended.chat.title}"'
-                             f'({sended.chat.id})')
-            except (ChatNotFound, ChatIdIsEmpty):
-                await message.answer(f'Группа с id {i} не найдена')
-                logging.error(f'ID {i} - group not found exception')
-
-        await message.answer(f'Текст отправлен в чаты: \n\n'
-                             f'{chats_recipients} \n\n'
-                             f'Содержание:\n\n{final_text}',
-                             reply_markup=types.ReplyKeyboardRemove())
-
-        logging.info(f'{message.chat.username}({message.chat.id}) '
-                     f'completed the last stage')
-
-        await state.finish()
+        await notification_sender(message, state, user_data, final_text)
         return
     #
 
@@ -180,24 +158,5 @@ async def writing_description(message: types.Message, state: FSMContext):
                   f"{user_data.get('written_date_and_time')} \n\n"
                   f"{user_data.get('written_description')}")
 
-    chats_recipients = []
-
-    for i in chat_id[user_data.get('chosen_provider')]:
-        try:
-            sended = await message.bot.send_message(chat_id=i, text=final_text)
-            chats_recipients.append(sended.chat.title)
-            logging.info(f'Message has been sent to "{sended.chat.title}"'
-                         f'({sended.chat.id})')
-        except (ChatNotFound, ChatIdIsEmpty):
-            await message.answer(f'Группа с id {i} не найдена')
-            logging.error(f'ID {i} - group not found exception')
-
-    await message.answer(f'Текст отправлен в чаты: \n\n'
-                         f'{chats_recipients} \n\n'
-                         f'Содержание:\n\n{final_text}',
-                         reply_markup=types.ReplyKeyboardRemove())
-
-    logging.info(f'{message.chat.username}({message.chat.id}) '
-                 f'completed the last stage')
-
-    await state.finish()
+    await notification_sender(message, state, user_data, final_text)
+    return

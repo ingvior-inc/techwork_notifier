@@ -2,7 +2,7 @@ import logging
 
 from aiogram import executor
 
-from app.bot import dp
+from app.handlers import dp
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s | %(levelname)s — %(message)s',
