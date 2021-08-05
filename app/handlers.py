@@ -19,7 +19,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 @dp.message_handler(Text(equals='Отмена', ignore_case=True), state='*')
 async def cancel_handler(message: types.Message, state: FSMContext):
     """
-    Allow user to cancel any action
+    Позволяет завершить работу на любом этапе цикла до рассылки
     """
     current_state = await state.get_state()
     if current_state is None:
@@ -27,9 +27,9 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
     logging.info(f'{message.chat.username}({message.chat.id}) '
                  f'cancelling state {current_state}')
-    # Cancel state and inform user about it
+
     await state.finish()
-    # And remove keyboard (just in case)
+
     await message.reply('Операция отменена. \n'
                         'Пропишите /start, чтобы начать заново',
                         reply_markup=types.ReplyKeyboardRemove())

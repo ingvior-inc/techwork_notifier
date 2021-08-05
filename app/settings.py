@@ -11,6 +11,15 @@ load_dotenv()
 TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN, parse_mode='HTML')
 
+# Настройки webhook
+WEBHOOK_HOST = os.getenv('WEBHOOK_HOST')
+WEBHOOK_PATH = os.getenv('WEBHOOK_PATH')
+WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
+
+# Настройки webserver
+WEBAPP_HOST = os.getenv('WEBAPP_HOST')
+WEBAPP_PORT = os.getenv('WEBAPP_PORT')
+
 # Пользователи, которые могут использовать бота
 accepted_user_id = (512309881, 170476466)
 
