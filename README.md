@@ -5,7 +5,7 @@
  - **WEBHOOK_HOST** хостом, к которому будет цепляться хук серверов тг
  - **WEBHOOK_PATH** путём до нужного ресурса хоста в формате /hook
  - **WEBAPP_HOST** хостом webserverа
- - **WEBAPP_HOST** портом webservera
+ - **WEBAPP_PORT** портом webservera
 
 <hr>
 
