@@ -1,11 +1,12 @@
 # Vepay Notifier - Telegram-нотификации об инцидентах
 
-Параметры окружения **.env** заполнить:
- - **TOKEN** апи-токеном нужного бота (брать из @BotFather)
- - **WEBHOOK_HOST** хостом, к которому будет цепляться хук серверов тг
- - **WEBHOOK_PATH** путём до нужного ресурса хоста в формате /hook
- - **WEBAPP_HOST** хостом webserverа
- - **WEBAPP_PORT** портом webservera
+Параметры окружения **.env**:
+ - **TOKEN** - api-токен нужного бота (брать из @BotFather)
+ - **WEBHOOK_IS_ACTIVE** - True, если используем webhook | False, если хотим постоянно опрашивать сервера Telegram на наличие новых событий
+ - **WEBHOOK_HOST** хост, к которому будет цепляться webhook серверов Telegram
+ - **WEBHOOK_PATH** путь до нужного ресурса хоста в формате /hook. Telegram советует использовать в наименовании пути api-token для идентификации источника запроса
+ - **WEBAPP_HOST** хост webserverа
+ - **WEBAPP_PORT** порт webservera
 
 <hr>
 
