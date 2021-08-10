@@ -12,6 +12,7 @@
  - **PROVIDER_TKB** чаты TKB
  - **PROVIDER_FORTA_TECH** чаты Forta Tech
  - **PROVIDER_BRS** чаты BRS
+ - **PROVIDER_WALLETTO** чаты Walletto
 
 <hr>
 

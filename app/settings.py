@@ -4,7 +4,8 @@ from aiogram import Bot
 from dotenv import load_dotenv
 
 from app.text_parts import (PROVIDER_SELF, PROVIDER_TKB,
-                            PROVIDER_FORTA_TECH, PROVIDER_BRS)
+                            PROVIDER_FORTA_TECH, PROVIDER_BRS,
+                            PROVIDER_WALLETTO)
 
 load_dotenv()
 
@@ -30,5 +31,6 @@ chat_id = {
     PROVIDER_SELF: list(map(int, os.getenv('PROVIDER_SELF').split(','))),
     PROVIDER_TKB: list(map(int, os.getenv('PROVIDER_TKB').split(','))),
     PROVIDER_FORTA_TECH: list(map(int, os.getenv('PROVIDER_FORTA_TECH').split(','))),
-    PROVIDER_BRS: list(map(int, os.getenv('PROVIDER_BRS').split(',')))
+    PROVIDER_BRS: list(map(int, os.getenv('PROVIDER_BRS').split(','))),
+    PROVIDER_WALLETTO: list(map(int, os.getenv('PROVIDER_WALLETTO').split(',')))
 }
