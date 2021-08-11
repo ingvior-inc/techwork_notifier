@@ -8,11 +8,15 @@
  - **WEBAPP_HOST** хост webserverа
  - **WEBAPP_PORT** порт webservera
  - **ACCEPTED_USER_ID** список пользователей, которым разрешено пользоваться ботом
- - **PROVIDER_SELF** чаты Vepay
- - **PROVIDER_TKB** чаты TKB
- - **PROVIDER_FORTA_TECH** чаты Forta Tech
- - **PROVIDER_BRS** чаты BRS
- - **PROVIDER_WALLETTO** чаты Walletto
+ - **PROVIDER_{NAME}** чаты, по которым уйдёт рассылка по указанному провайдеру NAME
+
+<hr>
+
+**Как добавить нового провайдера**
+1. В *text_parts.py* создать константу с именем провайдера
+2. В *text_parts.py* добавить новую константу в список *providers*
+3. Добавить новую константу в *.env*
+4. В *settings.py* добавить новую константу в качестве ключа словаря *chat_id*, значением указать *os.getenv('Название параметра окружения').split(',')*
 
 <hr>
 
