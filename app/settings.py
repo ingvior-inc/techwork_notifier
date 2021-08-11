@@ -24,13 +24,13 @@ WEBAPP_HOST = os.getenv('WEBAPP_HOST')
 WEBAPP_PORT = os.getenv('WEBAPP_PORT')
 
 # Пользователи, которые могут использовать бота
-accepted_user_id = list(map(int, os.getenv('ACCEPTED_USER_ID').split(',')))
+accepted_user_id = os.getenv('ACCEPTED_USER_ID').split(',')
 
 # По каким чатам рассылать сообщение по выбранному провайдеру
 chat_id = {
-    PROVIDER_SELF: list(map(int, os.getenv('PROVIDER_SELF').split(','))),
-    PROVIDER_TKB: list(map(int, os.getenv('PROVIDER_TKB').split(','))),
-    PROVIDER_FORTA_TECH: list(map(int, os.getenv('PROVIDER_FORTA_TECH').split(','))),
-    PROVIDER_BRS: list(map(int, os.getenv('PROVIDER_BRS').split(','))),
-    PROVIDER_WALLETTO: list(map(int, os.getenv('PROVIDER_WALLETTO').split(',')))
+    PROVIDER_SELF: os.getenv('PROVIDER_SELF').split(','),
+    PROVIDER_TKB: os.getenv('PROVIDER_TKB').split(','),
+    PROVIDER_FORTA_TECH: os.getenv('PROVIDER_FORTA_TECH').split(','),
+    PROVIDER_BRS: os.getenv('PROVIDER_BRS').split(','),
+    PROVIDER_WALLETTO: os.getenv('PROVIDER_WALLETTO').split(',')
 }

@@ -12,7 +12,7 @@ def white_list(func):
     Декоратор таковых проверяет.
     """
     async def wrapper(message):
-        if message.chat.id in accepted_user_id:
+        if str(message.chat.id) in accepted_user_id:
             logging.info(f'{message.chat.username}({message.chat.id})'
                          f' - accepted')
             return await func(message)
