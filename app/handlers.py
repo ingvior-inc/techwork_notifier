@@ -102,8 +102,8 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     if (user_data.get('chosen_situation')
             in (HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE)):
 
-        final_text = (f"{user_data.get('chosen_situation')}\n\n"
-                      f"{PROVIDER}{user_data.get('chosen_provider')}")
+        final_text = (f"{user_data.get('chosen_situation')} "
+                      f"у <i>{user_data.get('chosen_provider')}</i>")
 
         await notification_sender(message, state, user_data, final_text)
         return
@@ -153,9 +153,9 @@ async def writing_description(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
 
     final_text = (f"{user_data.get('chosen_situation')} \n\n"
-                  f"{PROVIDER}{user_data.get('chosen_provider')} \n"
+                  f"{PROVIDER}<i>{user_data.get('chosen_provider')}</i> \n"
                   f"{DATE_AND_TIME}"
-                  f"{user_data.get('written_date_and_time')} \n\n"
+                  f"<i>{user_data.get('written_date_and_time')}</i> \n\n"
                   f"{user_data.get('written_description')}")
 
     await notification_sender(message, state, user_data, final_text)

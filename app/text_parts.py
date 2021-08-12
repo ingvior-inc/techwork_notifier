@@ -8,11 +8,11 @@ HAPPENED_TECHNICAL_WORK_RESOLVE = HAPPENED_TECHNICAL_WORK + ' завершены
 
 PROVIDER = '<b>Ответственный: </b>'
 
-PROVIDER_SELF = 'VEPAY'
-PROVIDER_TKB = 'Банк ТКБ'
-PROVIDER_FORTA_TECH = 'Провайдер Forta Tech'
-PROVIDER_BRS = 'Банк Русский Стандарт (БРС)'
-PROVIDER_WALLETTO = 'Провайдер Walletto'
+PROVIDER_SELF = '#VEPAY'
+PROVIDER_TKB = '#ТКБ (ТрансКапиталБанк)'
+PROVIDER_FORTA_TECH = '#Forta_Tech'
+PROVIDER_BRS = '#БРС (Банк Русский Стандарт)'
+PROVIDER_WALLETTO = '#Walletto'
 
 #######################################################
 
