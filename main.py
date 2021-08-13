@@ -1,5 +1,4 @@
 import logging
-import socket
 
 from aiogram import executor
 from aiogram.utils.executor import start_webhook
@@ -40,8 +39,6 @@ if __name__ == '__main__':
                 host=WEBAPP_HOST,
                 port=WEBAPP_PORT
             )
-        except socket.gaierror:
-            logging.error('Failed to connect to webserver host')
         except Exception as E:
             logging.error(f'An error occurred while connecting - {E}')
     else:
