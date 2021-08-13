@@ -2,6 +2,7 @@ import logging
 
 from aiogram import executor
 from aiogram.utils.executor import start_webhook
+from aiogram.utils.exceptions import Unauthorized
 
 from app.handlers import dp
 from app.settings import (bot, WEBHOOK_IS_ACTIVE,
@@ -28,8 +29,8 @@ async def on_shutdown(dp):
 
 
 if __name__ == '__main__':
-    if WEBHOOK_IS_ACTIVE:
-        try:
+    try:
+        if WEBHOOK_IS_ACTIVE:
             start_webhook(
                 dispatcher=dp,
                 webhook_path=WEBHOOK_PATH,
@@ -39,7 +40,9 @@ if __name__ == '__main__':
                 host=WEBAPP_HOST,
                 port=WEBAPP_PORT
             )
-        except Exception as E:
-            logging.error(f'An error occurred while connecting - {E}')
-    else:
-        executor.start_polling(dp, skip_updates=True)
+        else:
+            executor.start_polling(dp, skip_updates=True)
+    except Unauthorized:
+        logging.error('Incorrect bot api-token')
+    except Exception as E:
+        logging.error(f'An error occurred while launching the bot - {E}')
