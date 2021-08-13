@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from app.text_parts import (PROVIDER_SELF, PROVIDER_TKB,
                             PROVIDER_FORTA_TECH, PROVIDER_BRS,
-                            PROVIDER_WALLETTO)
+                            PROVIDER_WALLETTO, PROVIDER_THIRD_PARTY)
 
 load_dotenv()
 
@@ -32,5 +32,6 @@ chat_id = {
     PROVIDER_TKB: os.getenv('PROVIDER_TKB').split(','),
     PROVIDER_FORTA_TECH: os.getenv('PROVIDER_FORTA_TECH').split(','),
     PROVIDER_BRS: os.getenv('PROVIDER_BRS').split(','),
-    PROVIDER_WALLETTO: os.getenv('PROVIDER_WALLETTO').split(',')
+    PROVIDER_WALLETTO: os.getenv('PROVIDER_WALLETTO').split(','),
+    PROVIDER_THIRD_PARTY: os.getenv('PROVIDER_THIRD_PARTY').split(',')
 }

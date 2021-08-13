@@ -13,6 +13,7 @@ PROVIDER_TKB = '#ТКБ (ТрансКапиталБанк)'
 PROVIDER_FORTA_TECH = '#Forta_Tech'
 PROVIDER_BRS = '#БРС (Банк Русский Стандарт)'
 PROVIDER_WALLETTO = '#Walletto'
+PROVIDER_THIRD_PARTY = '#сторонний_сервис'
 
 #######################################################
 
@@ -23,4 +24,4 @@ DATE_AND_TIME = '<b>Когда: </b>'
 situations = [HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
               HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE]
 providers = [PROVIDER_SELF, PROVIDER_TKB, PROVIDER_FORTA_TECH, PROVIDER_BRS,
-             PROVIDER_WALLETTO]
+             PROVIDER_WALLETTO, PROVIDER_THIRD_PARTY]
