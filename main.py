@@ -9,7 +9,7 @@ from app.settings import (bot, WEBHOOK_IS_ACTIVE,
                           WEBHOOK_URL, WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT)
 
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s | %(levelname)s — %(message)s',
+                    format='%(asctime)s | %(levelname)s | %(message)s',
                     datefmt='%d.%m.%Y, %H:%M:%S',)
 
 

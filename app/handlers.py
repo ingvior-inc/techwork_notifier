@@ -5,7 +5,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
-from app.functions import white_list, notification_sender
+from app.functions import white_list, notification_sender, get_current_time
 from app.settings import bot
 from app.states import OrderBuildingNotif
 from app.text_parts import (HAPPENED_FAILUTE_RESOLVE,
@@ -102,8 +102,12 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     if (user_data.get('chosen_situation')
             in (HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE)):
 
-        final_text = (f"<em>{user_data.get('chosen_situation')}</em> "
-                      f"у {user_data.get('chosen_provider')}")
+        time_now = await get_current_time()
+        situation_text_split = user_data.get('chosen_situation').split(' ')
+        final_text = (f"<em>{situation_text_split[0]}</em> "
+                      f"у {user_data.get('chosen_provider')} "
+                      f"{situation_text_split[1]} на момент "
+                      f"{time_now}")
 
         await notification_sender(message, state, user_data, final_text)
         return
@@ -127,7 +131,11 @@ async def writing_date_and_time(message: types.Message, state: FSMContext):
     1. Сохранение прописанных даты и времени
     2. Запрос описания: пишется вручную
     """
-    await state.update_data(written_date_and_time=message.text)
+    if message.text == 'Сейчас':
+        time_now = await get_current_time()
+        await state.update_data(written_date_and_time=f'Сейчас ({time_now})')
+    else:
+        await state.update_data(written_date_and_time=message.text)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add('Отмена')

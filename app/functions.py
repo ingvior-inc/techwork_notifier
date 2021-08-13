@@ -1,4 +1,5 @@
 import logging
+import datetime
 
 from aiogram import types
 from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
@@ -13,17 +14,17 @@ def white_list(func):
     """
     async def wrapper(message):
         if str(message.chat.id) in accepted_user_id:
-            logging.info(f'{message.chat.username}({message.chat.id})'
-                         f' - accepted')
+            logging.warning(f'{message.chat.username}({message.chat.id})'
+                            f' - accepted')
             return await func(message)
         # Вызовы к боту из групп игнорировать
         elif message.chat.id < 0:
-            logging.info(f'{message.chat.title}({message.chat.id}):'
-                         f' - is group, ignored')
+            logging.warning(f'{message.chat.title}({message.chat.id}):'
+                            f' - is group, ignored')
             return None
         else:
-            logging.info(f'{message.chat.username}({message.chat.id})'
-                         f' - denied')
+            logging.warning(f'{message.chat.username}({message.chat.id})'
+                            f' - denied')
             await message.answer('Доступ запрещён')
     return wrapper
 
@@ -54,4 +55,9 @@ async def notification_sender(message, state, user_data, final_text):
                  f'completed the last stage')
 
     await state.finish()
-    return
+
+
+async def get_current_time():
+    delta = datetime.timedelta(hours=3, minutes=0)
+    now_utc_3 = datetime.datetime.now(datetime.timezone.utc) + delta
+    return now_utc_3.strftime('%d.%m.%Y, %H:%M')
