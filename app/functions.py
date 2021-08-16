@@ -25,7 +25,7 @@ def white_list(func):
         else:
             logging.warning(f'{message.chat.username}({message.chat.id})'
                             f' - denied')
-            await message.answer('Доступ запрещён')
+            return await message.answer('Доступ запрещён')
     return wrapper
 
 
