@@ -9,17 +9,15 @@ from app.settings import (WEBHOOK_IS_ACTIVE, WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, TOKEN)
 
 
-async def on_startup(dp):
+async def on_startup(dp: Dispatcher):
     logging.warning('Setting handlers...')
+    handlers.setup(dp)
     if WEBHOOK_IS_ACTIVE:
-        handlers.setup(dp)
         logging.warning('Setting webhook...')
         await bot.set_webhook(WEBHOOK_URL)
-    else:
-        handlers.setup(dp)
 
 
-async def on_shutdown(dp):
+async def on_shutdown(dp: Dispatcher):
     logging.warning('Shutting down..')
 
     await dp.storage.close()
