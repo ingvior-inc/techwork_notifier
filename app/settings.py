@@ -1,3 +1,4 @@
+import logging
 import os
 
 from aiogram import Bot
@@ -11,6 +12,10 @@ from app.const import (PROVIDER_SELF, PROVIDER_TKB,
                        HAPPENED_TECHNICAL_WORK_RESOLVE)
 
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s | %(levelname)s | %(message)s',
+                    datefmt='%d.%m.%Y, %H:%M:%S')
 
 TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN, parse_mode='HTML')

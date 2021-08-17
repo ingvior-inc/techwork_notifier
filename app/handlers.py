@@ -5,13 +5,13 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
-from app.functions import white_list, notification_sender, get_current_time
-from app.settings import bot, situations, providers
-from app.states import OrderBuildingNotif
 from app.const import (HAPPENED_FAILUTE_RESOLVE,
                        HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
                        DATE_AND_TIME, BUTTON_NOW, BUTTON_CANCEL,
                        USE_KEYBOARD_PLEASE)
+from app.functions import white_list, notification_sender, get_current_time
+from app.settings import bot, situations, providers
+from app.states import OrderBuildingNotif
 
 dp = Dispatcher(bot, storage=MemoryStorage())
 

@@ -1,16 +1,12 @@
 import logging
 
 from aiogram import executor
-from aiogram.utils.executor import start_webhook
 from aiogram.utils.exceptions import Unauthorized
+from aiogram.utils.executor import start_webhook
 
 from app.handlers import dp
 from app.settings import (bot, WEBHOOK_IS_ACTIVE,
                           WEBHOOK_URL, WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT)
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s | %(levelname)s | %(message)s',
-                    datefmt='%d.%m.%Y, %H:%M:%S',)
 
 
 async def on_startup(dp):
