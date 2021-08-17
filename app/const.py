@@ -18,10 +18,12 @@ PROVIDER_THIRD_PARTY = '#сторонний_сервис'
 #######################################################
 
 DATE_AND_TIME = '<b>Когда: </b>'
+BUTTON_NOW = 'Сейчас'
 
 #######################################################
 
-situations = [HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
-              HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE]
-providers = [PROVIDER_SELF, PROVIDER_TKB, PROVIDER_FORTA_TECH, PROVIDER_BRS,
-             PROVIDER_WALLETTO, PROVIDER_THIRD_PARTY]
+USE_KEYBOARD_PLEASE = 'Пожалуйста, сделайте выбор с помощью клавиатуры'
+
+#######################################################
+
+BUTTON_CANCEL = 'Отмена'

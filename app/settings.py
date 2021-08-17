@@ -3,9 +3,12 @@ import os
 from aiogram import Bot
 from dotenv import load_dotenv
 
-from app.text_parts import (PROVIDER_SELF, PROVIDER_TKB,
-                            PROVIDER_FORTA_TECH, PROVIDER_BRS,
-                            PROVIDER_WALLETTO, PROVIDER_THIRD_PARTY)
+from app.const import (PROVIDER_SELF, PROVIDER_TKB,
+                       PROVIDER_FORTA_TECH, PROVIDER_BRS,
+                       PROVIDER_WALLETTO, PROVIDER_THIRD_PARTY,
+                       HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
+                       HAPPENED_FAILUTE_RESOLVE,
+                       HAPPENED_TECHNICAL_WORK_RESOLVE)
 
 load_dotenv()
 
@@ -35,3 +38,9 @@ chat_id = {
     PROVIDER_WALLETTO: os.getenv('PROVIDER_WALLETTO').split(','),
     PROVIDER_THIRD_PARTY: os.getenv('PROVIDER_THIRD_PARTY').split(',')
 }
+
+situations = [HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
+              HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE]
+
+providers = [PROVIDER_SELF, PROVIDER_TKB, PROVIDER_FORTA_TECH, PROVIDER_BRS,
+             PROVIDER_WALLETTO, PROVIDER_THIRD_PARTY]

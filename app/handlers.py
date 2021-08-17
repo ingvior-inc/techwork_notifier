@@ -6,17 +6,18 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
 from app.functions import white_list, notification_sender, get_current_time
-from app.settings import bot
+from app.settings import bot, situations, providers
 from app.states import OrderBuildingNotif
-from app.text_parts import (HAPPENED_FAILUTE_RESOLVE,
-                            HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
-                            DATE_AND_TIME, situations, providers)
+from app.const import (HAPPENED_FAILUTE_RESOLVE,
+                       HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
+                       DATE_AND_TIME, BUTTON_NOW, BUTTON_CANCEL,
+                       USE_KEYBOARD_PLEASE)
 
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 @dp.message_handler(state='*', commands='cancel')
-@dp.message_handler(Text(equals='Отмена', ignore_case=True), state='*')
+@dp.message_handler(Text(equals=BUTTON_CANCEL, ignore_case=True), state='*')
 async def cancel_handler(message: types.Message, state: FSMContext):
     """
     Позволяет завершить работу на любом этапе цикла до рассылки
@@ -44,7 +45,7 @@ async def start_building_notif(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for i in situations:
         keyboard.add(i)
-    keyboard.add('Отмена')
+    keyboard.add(BUTTON_CANCEL)
 
     await OrderBuildingNotif.waiting_for_situation.set()
     await message.answer('О чём хотим сообщить?', reply_markup=keyboard)
@@ -61,7 +62,7 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
     2. Выбор провайдера
     """
     if message.text not in situations:
-        await message.answer('Выберите ситуацию с помощью клавиатуры')
+        await message.answer(USE_KEYBOARD_PLEASE)
         return
 
     await state.update_data(chosen_situation=message.text)
@@ -69,7 +70,7 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for i in providers:
         keyboard.add(i)
-    keyboard.add('Отмена')
+    keyboard.add(BUTTON_CANCEL)
 
     await OrderBuildingNotif.next()
     await message.answer('У кого?', reply_markup=keyboard)
@@ -89,12 +90,12 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     3. Запрос даты и времени: поставить Сейчас по кнопке или написать вручную
     """
     if message.text not in providers:
-        await message.answer('Некорректный провайдер. \n'
-                             'Выберите с помощью клавиатуры')
+        await message.answer(USE_KEYBOARD_PLEASE)
         return
 
     await state.update_data(chosen_provider=message.text)
 
+    ##########################################################################
     # Проверка на ситуацию: если сбой или работы завершены, то разослать текст
     # и закончить state-машину
     user_data = await state.get_data()
@@ -111,11 +112,11 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
 
         await notification_sender(message, state, user_data, final_text)
         return
-    #
+    ##########################################################################
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add('Сейчас')
-    keyboard.add('Отмена')
+    keyboard.add(BUTTON_NOW)
+    keyboard.add(BUTTON_CANCEL)
 
     await OrderBuildingNotif.next()
     await message.answer('Когда?', reply_markup=keyboard)
@@ -131,14 +132,15 @@ async def writing_date_and_time(message: types.Message, state: FSMContext):
     1. Сохранение прописанных даты и времени
     2. Запрос описания: пишется вручную
     """
-    if message.text == 'Сейчас':
+    if message.text == BUTTON_NOW:
         time_now = await get_current_time()
-        await state.update_data(written_date_and_time=f'Сейчас ({time_now})')
+        await state.update_data(written_date_and_time=(f'{BUTTON_NOW} '
+                                                       f'({time_now})'))
     else:
         await state.update_data(written_date_and_time=message.text)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add('Отмена')
+    keyboard.add(BUTTON_CANCEL)
 
     await OrderBuildingNotif.next()
     await message.answer('Опишите ситуацию', reply_markup=keyboard)
