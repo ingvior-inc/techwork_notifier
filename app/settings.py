@@ -1,7 +1,6 @@
 import logging
 import os
 
-from aiogram import Bot
 from dotenv import load_dotenv
 
 from app.const import (PROVIDER_SELF, PROVIDER_TKB,
@@ -18,7 +17,6 @@ logging.basicConfig(level=logging.INFO,
                     datefmt='%d.%m.%Y, %H:%M:%S')
 
 TOKEN = os.getenv('TOKEN')
-bot = Bot(token=TOKEN, parse_mode='HTML')
 
 # Настройки webhook
 WEBHOOK_IS_ACTIVE = (os.getenv('WEBHOOK_IS_ACTIVE', default=False).lower()

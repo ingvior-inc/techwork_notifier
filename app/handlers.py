@@ -1,7 +1,6 @@
 import logging
 
-from aiogram import Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
@@ -10,14 +9,10 @@ from app.const import (HAPPENED_FAILUTE_RESOLVE,
                        DATE_AND_TIME, BUTTON_NOW, BUTTON_CANCEL,
                        USE_KEYBOARD_PLEASE)
 from app.functions import white_list, notification_sender, get_current_time
-from app.settings import bot, situations, providers
+from app.settings import situations, providers
 from app.states import OrderBuildingNotif
 
-dp = Dispatcher(bot, storage=MemoryStorage())
 
-
-@dp.message_handler(state='*', commands='cancel')
-@dp.message_handler(Text(equals=BUTTON_CANCEL, ignore_case=True), state='*')
 async def cancel_handler(message: types.Message, state: FSMContext):
     """
     Позволяет завершить работу на любом этапе цикла до рассылки
@@ -36,7 +31,6 @@ async def cancel_handler(message: types.Message, state: FSMContext):
                         reply_markup=types.ReplyKeyboardRemove())
 
 
-@dp.message_handler(commands=['start', 'help'], state=None)
 @white_list
 async def start_building_notif(message: types.Message):
     """
@@ -54,7 +48,6 @@ async def start_building_notif(message: types.Message):
                  f'switched to {OrderBuildingNotif.waiting_for_situation}')
 
 
-@dp.message_handler(state=OrderBuildingNotif.waiting_for_situation)
 async def choice_of_situation(message: types.Message, state: FSMContext):
     """
     Второй этап:
@@ -79,7 +72,6 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
                  f'switched to {OrderBuildingNotif.waiting_for_provider}')
 
 
-@dp.message_handler(state=OrderBuildingNotif.waiting_for_provider)
 async def choice_of_provider(message: types.Message, state: FSMContext):
     """
     Третий этап:
@@ -125,7 +117,6 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
                  f'switched to {OrderBuildingNotif.waiting_for_date_and_time}')
 
 
-@dp.message_handler(state=OrderBuildingNotif.waiting_for_date_and_time)
 async def writing_date_and_time(message: types.Message, state: FSMContext):
     """
     Четвёртый этап:
@@ -149,7 +140,6 @@ async def writing_date_and_time(message: types.Message, state: FSMContext):
                  f'switched to {OrderBuildingNotif.waiting_for_description}')
 
 
-@dp.message_handler(state=OrderBuildingNotif.waiting_for_description)
 async def writing_description(message: types.Message, state: FSMContext):
     """
     Пятый этап:
@@ -170,3 +160,23 @@ async def writing_description(message: types.Message, state: FSMContext):
 
     await notification_sender(message, state, user_data, final_text)
     return
+
+
+def setup(dp: Dispatcher):
+    """
+    Регистрация хандлеров в диспетчере
+    """
+    dp.register_message_handler(cancel_handler, commands='cancel', state='*')
+    dp.register_message_handler(cancel_handler,
+                                Text(equals=BUTTON_CANCEL, ignore_case=True),
+                                state='*')
+    dp.register_message_handler(start_building_notif,
+                                commands=['start', 'help'], state=None)
+    dp.register_message_handler(choice_of_situation,
+                                state=OrderBuildingNotif.waiting_for_situation)
+    dp.register_message_handler(choice_of_provider,
+                                state=OrderBuildingNotif.waiting_for_provider)
+    dp.register_message_handler(writing_date_and_time,
+                                state=OrderBuildingNotif.waiting_for_date_and_time)
+    dp.register_message_handler(writing_description,
+                                state=OrderBuildingNotif.waiting_for_description)

@@ -2,6 +2,7 @@ import datetime
 import logging
 
 from aiogram import types
+from aiogram.dispatcher import FSMContext
 from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
 
 from app.settings import accepted_user_id, chat_id
@@ -12,7 +13,7 @@ def white_list(func):
     Ботом могут пользоваться только одобренные партией пользователи.
     Декоратор таковых проверяет.
     """
-    async def wrapper(message):
+    async def wrapper(message: types.Message):
         if str(message.chat.id) in accepted_user_id:
             logging.warning(f'{message.chat.username}({message.chat.id})'
                             f' - accepted')
@@ -29,7 +30,10 @@ def white_list(func):
     return wrapper
 
 
-async def notification_sender(message, state, user_data, final_text):
+async def notification_sender(message: types.Message,
+                              state: FSMContext,
+                              user_data: dict,
+                              final_text: str):
     """
     Рассылка сообщений по чатам, в зависимости от выбранного провайдера.
     """
@@ -58,6 +62,6 @@ async def notification_sender(message, state, user_data, final_text):
 
 
 async def get_current_time():
-    delta = datetime.timedelta(hours=3, minutes=0)
+    delta = datetime.timedelta(hours=3)
     now_utc_3 = datetime.datetime.now(datetime.timezone.utc) + delta
     return now_utc_3.strftime('%d.%m.%Y, %H:%M')

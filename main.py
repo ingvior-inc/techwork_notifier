@@ -1,30 +1,37 @@
 import logging
 
-from aiogram import executor
-from aiogram.utils.exceptions import Unauthorized
+from aiogram import Bot, Dispatcher, executor
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils.executor import start_webhook
 
-from app.handlers import dp
-from app.settings import (bot, WEBHOOK_IS_ACTIVE,
-                          WEBHOOK_URL, WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT)
+from app import handlers
+from app.settings import (WEBHOOK_IS_ACTIVE, WEBHOOK_URL, WEBHOOK_PATH,
+                          WEBAPP_HOST, WEBAPP_PORT, TOKEN)
 
 
 async def on_startup(dp):
-    await bot.set_webhook(WEBHOOK_URL)
+    logging.warning('Setting handlers...')
+    if WEBHOOK_IS_ACTIVE:
+        handlers.setup(dp)
+        logging.warning('Setting webhook...')
+        await bot.set_webhook(WEBHOOK_URL)
+    else:
+        handlers.setup(dp)
 
 
 async def on_shutdown(dp):
     logging.warning('Shutting down..')
 
-    await bot.delete_webhook()
-
     await dp.storage.close()
     await dp.storage.wait_closed()
 
-    logging.warning('Webhook down!')
+    await bot.delete_webhook()
+    logging.warning('Webhook down')
 
 
 if __name__ == '__main__':
+    bot = Bot(token=TOKEN, parse_mode='HTML')
+    dp = Dispatcher(bot, storage=MemoryStorage())
     try:
         if WEBHOOK_IS_ACTIVE:
             start_webhook(
@@ -37,8 +44,7 @@ if __name__ == '__main__':
                 port=WEBAPP_PORT
             )
         else:
-            executor.start_polling(dp, skip_updates=True)
-    except Unauthorized:
-        logging.error('Incorrect bot api-token')
+            executor.start_polling(dp, on_startup=on_startup,
+                                   skip_updates=True)
     except Exception as E:
         logging.error(f'An error occurred while launching the bot - {E}')
