@@ -171,7 +171,7 @@ def setup(dp: Dispatcher):
                                 Text(equals=BUTTON_CANCEL, ignore_case=True),
                                 state='*')
     dp.register_message_handler(start_building_notif,
-                                commands=['start', 'help'], state=None)
+                                commands=('start', 'help'), state=None)
     dp.register_message_handler(choice_of_situation,
                                 state=OrderBuildingNotif.waiting_for_situation)
     dp.register_message_handler(choice_of_provider,

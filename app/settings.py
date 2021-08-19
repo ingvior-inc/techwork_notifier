@@ -1,12 +1,10 @@
 import logging
 import os
 
+import psycopg2
 from dotenv import load_dotenv
 
-from app.const import (PROVIDER_SELF, PROVIDER_TKB,
-                       PROVIDER_FORTA_TECH, PROVIDER_BRS,
-                       PROVIDER_WALLETTO, PROVIDER_THIRD_PARTY,
-                       HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
+from app.const import (HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
                        HAPPENED_FAILUTE_RESOLVE,
                        HAPPENED_TECHNICAL_WORK_RESOLVE)
 
@@ -15,6 +13,21 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s | %(levelname)s | %(message)s',
                     datefmt='%d.%m.%Y, %H:%M:%S')
+
+# Подключение к БД PostgreSQL
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+
+try:
+    connect = psycopg2.connect(f"dbname={DB_NAME} "
+                               f"user={DB_USER} "
+                               f"password={DB_PASSWORD}")
+    cur = connect.cursor()
+    logging.warning('Database connection established!')
+except Exception:
+    logging.error('Database connection failed :(')
+
 
 TOKEN = os.getenv('TOKEN')
 
@@ -29,21 +42,9 @@ WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 WEBAPP_HOST = os.getenv('WEBAPP_HOST')
 WEBAPP_PORT = os.getenv('WEBAPP_PORT')
 
-# Пользователи, которые могут использовать бота
-accepted_user_id = os.getenv('ACCEPTED_USER_ID').split(',')
-
-# По каким чатам рассылать сообщение по выбранному провайдеру
-chat_id = {
-    PROVIDER_SELF: os.getenv('PROVIDER_SELF').split(','),
-    PROVIDER_TKB: os.getenv('PROVIDER_TKB').split(','),
-    PROVIDER_FORTA_TECH: os.getenv('PROVIDER_FORTA_TECH').split(','),
-    PROVIDER_BRS: os.getenv('PROVIDER_BRS').split(','),
-    PROVIDER_WALLETTO: os.getenv('PROVIDER_WALLETTO').split(','),
-    PROVIDER_THIRD_PARTY: os.getenv('PROVIDER_THIRD_PARTY').split(',')
-}
-
 situations = [HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
               HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE]
 
-providers = [PROVIDER_SELF, PROVIDER_TKB, PROVIDER_FORTA_TECH, PROVIDER_BRS,
-             PROVIDER_WALLETTO, PROVIDER_THIRD_PARTY]
+# Список провайдеров
+cur.execute('SELECT provider_desc FROM providers ORDER BY id')
+providers = [i for sub in cur.fetchall() for i in sub]

@@ -5,7 +5,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
 
-from app.settings import accepted_user_id, chat_id
+from app.settings import cur
 
 
 def white_list(func):
@@ -14,7 +14,9 @@ def white_list(func):
     Декоратор таковых проверяет.
     """
     async def wrapper(message: types.Message):
-        if str(message.chat.id) in accepted_user_id:
+        cur.execute("SELECT chat_id FROM accepted_user_id")
+        accepted_user_id = [i for sub in cur.fetchall() for i in sub]
+        if message.chat.id in accepted_user_id:
             logging.warning(f'{message.chat.username}({message.chat.id})'
                             f' - accepted')
             return await func(message)
@@ -38,8 +40,16 @@ async def notification_sender(message: types.Message,
     Рассылка сообщений по чатам, в зависимости от выбранного провайдера.
     """
     chats_recipients = []
+    chosen_provider = user_data.get('chosen_provider')
 
-    for i in chat_id[user_data.get('chosen_provider')]:
+    cur.execute(f"SELECT chat_id "
+                f"FROM chats "
+                f"JOIN providers ON providers.id = chats.provider_id "
+                f"WHERE provider_desc = '{chosen_provider}'")
+
+    chat_id_parsed = [i for sub in cur.fetchall() for i in sub]
+
+    for i in chat_id_parsed:
         try:
             sended = await message.bot.send_message(chat_id=i,
                                                     text=final_text)
