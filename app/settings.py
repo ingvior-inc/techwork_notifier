@@ -4,10 +4,6 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 
-from app.const import (HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
-                       HAPPENED_FAILUTE_RESOLVE,
-                       HAPPENED_TECHNICAL_WORK_RESOLVE)
-
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO,
@@ -41,9 +37,6 @@ WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 # Настройки webserver
 WEBAPP_HOST = os.getenv('WEBAPP_HOST')
 WEBAPP_PORT = os.getenv('WEBAPP_PORT')
-
-situations = [HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
-              HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE]
 
 # Список провайдеров
 cur.execute('SELECT provider_desc FROM providers ORDER BY id')

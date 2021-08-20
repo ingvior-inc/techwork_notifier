@@ -4,13 +4,18 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
-from app.const import (HAPPENED_FAILUTE_RESOLVE,
+from app.const import (HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
+                       HAPPENED_FAILUTE_RESOLVE,
                        HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
                        DATE_AND_TIME, BUTTON_NOW, BUTTON_CANCEL,
                        USE_KEYBOARD_PLEASE)
 from app.functions import white_list, notification_sender, get_current_time
-from app.settings import situations, providers
+from app.settings import providers
 from app.states import OrderBuildingNotif
+
+
+situations = [HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
+              HAPPENED_FAILUTE_RESOLVE, HAPPENED_TECHNICAL_WORK_RESOLVE]
 
 
 async def cancel_handler(message: types.Message, state: FSMContext):
@@ -171,7 +176,7 @@ def setup(dp: Dispatcher):
                                 Text(equals=BUTTON_CANCEL, ignore_case=True),
                                 state='*')
     dp.register_message_handler(start_building_notif,
-                                commands=('start', 'help'), state=None)
+                                commands='start', state=None)
     dp.register_message_handler(choice_of_situation,
                                 state=OrderBuildingNotif.waiting_for_situation)
     dp.register_message_handler(choice_of_provider,

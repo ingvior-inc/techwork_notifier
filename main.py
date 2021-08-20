@@ -5,13 +5,16 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils.executor import start_webhook
 
 from app import handlers
+from app.commands import set_commands
 from app.settings import (WEBHOOK_IS_ACTIVE, WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, TOKEN)
 
 
 async def on_startup(dp: Dispatcher):
     logging.warning('Setting handlers...')
-    handlers.setup(dp)
+    handlers.setup_all(dp)
+    logging.warning('Setting commands...')
+    await set_commands(dp)
     if WEBHOOK_IS_ACTIVE:
         logging.warning('Setting webhook...')
         await bot.set_webhook(WEBHOOK_URL)
