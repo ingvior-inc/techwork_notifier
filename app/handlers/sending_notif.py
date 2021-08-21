@@ -9,8 +9,8 @@ from app.const import (HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
                        HAPPENED_TECHNICAL_WORK_RESOLVE, PROVIDER,
                        DATE_AND_TIME, BUTTON_NOW, BUTTON_CANCEL,
                        USE_KEYBOARD_PLEASE)
-from app.functions import white_list, notification_sender, get_current_time
-from app.settings import providers
+from app.functions import (white_list, notification_sender, get_current_time,
+                           get_provider_list)
 from app.states import OrderBuildingNotif
 
 
@@ -20,7 +20,7 @@ situations = [HAPPENED_FAILURE, HAPPENED_TECHNICAL_WORK,
 
 async def cancel_handler(message: types.Message, state: FSMContext):
     """
-    Позволяет завершить работу на любом этапе цикла до рассылки
+    Позволяет завершить работу на любом промежуточном State.
     """
     current_state = await state.get_state()
     if current_state is None:
@@ -39,7 +39,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 @white_list
 async def start_building_notif(message: types.Message):
     """
-    Первый этап сборки сообщения для рассылки. Выбор ситуации: сбой или работы
+    Первый этап сборки сообщения для рассылки. Выбор ситуации: сбой или работы.
     """
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for i in situations:
@@ -66,7 +66,7 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
     await state.update_data(chosen_situation=message.text)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    for i in providers:
+    for i in await get_provider_list():
         keyboard.add(i)
     keyboard.add(BUTTON_CANCEL)
 
@@ -86,7 +86,7 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     цикл завершается досрочно.
     3. Запрос даты и времени: поставить Сейчас по кнопке или написать вручную
     """
-    if message.text not in providers:
+    if message.text not in await get_provider_list():
         await message.answer(USE_KEYBOARD_PLEASE)
         return
 

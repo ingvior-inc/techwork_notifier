@@ -72,6 +72,17 @@ async def notification_sender(message: types.Message,
 
 
 async def get_current_time():
+    """
+    Получить текущее время по МСК.
+    """
     delta = datetime.timedelta(hours=3)
     now_utc_3 = datetime.datetime.now(datetime.timezone.utc) + delta
     return now_utc_3.strftime('%d.%m.%Y, %H:%M')
+
+
+async def get_provider_list():
+    """
+    Получить список имён провайдеров.
+    """
+    cur.execute('SELECT provider_desc FROM providers ORDER BY id')
+    return [i for sub in cur.fetchall() for i in sub]

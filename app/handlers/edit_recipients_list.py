@@ -5,8 +5,8 @@ from aiogram.dispatcher import FSMContext
 
 from app.const import (BUTTON_CANCEL, USE_KEYBOARD_PLEASE,
                        ADD_CHAT, DELETE_CHAT, ADD_PROVIDER, DELETE_PROVIDER)
-from app.functions import white_list
-from app.settings import providers, cur, connect
+from app.functions import white_list, get_provider_list
+from app.settings import cur, connect
 from app.states import OrderEditingChatsOrProviders
 
 
@@ -39,7 +39,7 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
     if user_data.get('chosen_situation') in (ADD_CHAT, DELETE_CHAT):
-        for i in providers:
+        for i in await get_provider_list():
             keyboard.add(i)
         keyboard.add(BUTTON_CANCEL)
 
@@ -52,10 +52,13 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
                      f'{OrderEditingChatsOrProviders.waiting_for_provider}')
         return
 
+    if user_data.get('chosen_situation') == DELETE_PROVIDER:
+        for i in await get_provider_list():
+            keyboard.add(i)
     keyboard.add(BUTTON_CANCEL)
 
     await OrderEditingChatsOrProviders.waiting_for_write_provider.set()
-    await message.answer('Напишите имя нового провайдера',
+    await message.answer('Укажите имя провайдера',
                          reply_markup=keyboard)
 
     logging.info(f'{message.chat.username}({message.chat.id}) '
@@ -64,7 +67,7 @@ async def choice_of_situation(message: types.Message, state: FSMContext):
 
 
 async def choice_of_provider(message: types.Message, state: FSMContext):
-    if message.text not in providers:
+    if message.text not in await get_provider_list():
         await message.answer(USE_KEYBOARD_PLEASE)
         return
 
@@ -74,7 +77,7 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
     keyboard.add(BUTTON_CANCEL)
 
     await OrderEditingChatsOrProviders.waiting_for_chat_id.set()
-    await message.answer('Пропишите id чатов через запятую',
+    await message.answer('Укажите id чатов через запятую',
                          reply_markup=keyboard)
 
     logging.info(f'{message.chat.username}({message.chat.id}) '
@@ -84,19 +87,25 @@ async def choice_of_provider(message: types.Message, state: FSMContext):
 
 async def writing_provider(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
+
     if user_data.get('chosen_situation') == ADD_PROVIDER:
         cur.execute(f"INSERT INTO providers(provider_desc) "
                     f"VALUES ('{message.text}')")
-        connect.commit()
-        await message.answer(f'Добавлен провайдер: {message.text}',
-                             reply_markup=types.ReplyKeyboardRemove())
-        await state.finish()
-        return
-    cur.execute(f"DELETE FROM providers "
-                f"WHERE provider_desc = '{message.text}'")
+
+    else:
+        if message.text not in await get_provider_list():
+            await message.answer(USE_KEYBOARD_PLEASE)
+            return
+        cur.execute(f"DELETE FROM providers "
+                    f"WHERE provider_desc = '{message.text}'")
+
     connect.commit()
-    await message.answer(f'Провайдер удалён: {message.text}',
+
+    await message.answer(f"Выполнено:\n"
+                         f" - {user_data.get('chosen_situation')}\n"
+                         f" - {message.text}",
                          reply_markup=types.ReplyKeyboardRemove())
+
     await state.finish()
     return
 
@@ -109,29 +118,22 @@ async def writing_chat_id(message: types.Message, state: FSMContext):
                 f"FROM providers "
                 f"WHERE provider_desc = '{chosen_provider}'")
     provider_parsed = cur.fetchone()[0]
+
     if user_data.get('chosen_situation') == ADD_CHAT:
-        for i in chat_id_parsed:
-            if int(i) and int(i) < 0:
-                cur.execute(f"INSERT INTO chats(chat_id, provider_id) "
-                            f"VALUES({i}, {provider_parsed})")
-            else:
-                chat_id_parsed.remove(i)
-                await message.answer(f'{i} - некорректный id группы')
-        connect.commit()
-        await message.answer(f'Добавлены чаты: {chat_id_parsed}',
-                             reply_markup=types.ReplyKeyboardRemove())
-        await state.finish()
-        return
-    for i in chat_id_parsed:
-        if int(i) and int(i) < 0:
-            cur.execute(f"DELETE FROM chats "
-                        f"WHERE chat_id = '{i}'")
-        else:
-            chat_id_parsed.remove(i)
-            await message.answer(f'{i} - некорректный id группы')
+        [cur.execute(f"INSERT INTO chats(chat_id, provider_id) "
+                     f"VALUES({i}, {provider_parsed})")
+         for i in chat_id_parsed if int(i) < 0]
+
+    else:
+        [cur.execute(f"DELETE FROM chats "
+                     f"WHERE chat_id = '{i}'")
+         for i in chat_id_parsed if int(i) < 0]
+
     connect.commit()
-    await message.answer(f'Удалены чаты: {chat_id_parsed}',
+
+    await message.answer(f'Список чатов изменён',
                          reply_markup=types.ReplyKeyboardRemove())
+
     await state.finish()
     return
 
