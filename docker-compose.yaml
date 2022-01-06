@@ -1,0 +1,22 @@
+version: '3.8'
+
+volumes:
+  postgres_data:
+
+services:
+  db:
+    build: ./database
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: 111111wwwww
+  app:
+    build: .
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - ./.env
